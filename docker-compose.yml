@@ -1,0 +1,28 @@
+version: '3.9'
+services:
+  app:
+    build: .
+    container_name: personal-finance-api-app
+    command: gunicorn personal_finance_api.wsgi:application --bind 0.0.0.0:8000
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    environment:
+      - DJANGO_SETTINGS_MODULE=personal_finance_api.settings
+      - DATABASE_URL=postgres://postgres:postgres@db:5432/personal_finance
+  db:
+    image: postgres:15
+    container_name: personal-finance-api-db
+    environment:
+      POSTGRES_DB: personal_finance
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+volumes:
+  postgres_data:
