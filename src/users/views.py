@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 from django_filters.rest_framework import DjangoFilterBackend
 from users.serializers import UserSerializer
 
-class UserListView(mixins.ListAPIView, viewsets.GenericViewSet):
+class UserListView(mixins.ListModelMixin, viewsets.GenericViewSet):
     serializer_class = UserSerializer
     throttle_classes = [UserRateThrottle]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
