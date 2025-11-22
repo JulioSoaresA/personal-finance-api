@@ -21,6 +21,8 @@ schema_view = swagger_get_schema_view(
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('auth/', include('authentication.urls')),
+    path('users/', include('users.urls')),
     path('docs/', schema_view.with_ui('swagger', cache_timeout=0), name='swagger-schema')
 ]
 
