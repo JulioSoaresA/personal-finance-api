@@ -21,9 +21,9 @@ schema_view = swagger_get_schema_view(
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('auth/', include('authentication.urls')),
-    path('users/', include('users.urls')),
-    path('docs/', schema_view.with_ui('swagger', cache_timeout=0), name='swagger-schema')
+    path('api/auth/', include('authentication.urls', namespace='authentication')),
+    path('api/users/', include('users.urls', namespace='users')),
+    path('api/docs/', schema_view.with_ui('swagger', cache_timeout=0), name='swagger-schema')
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
