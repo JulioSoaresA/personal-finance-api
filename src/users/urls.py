@@ -3,6 +3,8 @@ from users.views import (
     UserListView, UserProfileView
 )
 
+app_name = 'users'
+
 
 urlpatterns = [
     path('user_list/', UserListView.as_view({'get': 'list'}), name='user_list'),
