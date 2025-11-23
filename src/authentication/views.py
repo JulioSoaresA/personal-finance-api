@@ -12,15 +12,14 @@ from django.conf import settings
 
 
 def _cookie_attrs():
-        secure = getattr(settings, "COOKIE_SECURE", not getattr(settings, "DEBUG", False))
-        samesite = getattr(settings, "COOKIE_SAMESITE", "Lax" if secure else "Lax")
-        return {
-                "httponly": True,
-                "secure": secure,
-                "samesite": samesite,
-                "path": "/",
-        }
-
+    secure = getattr(settings, "COOKIE_SECURE", not getattr(settings, "DEBUG", False))
+    samesite = getattr(settings, "COOKIE_SAMESITE", "None" if secure else "Lax")
+    return {
+        "httponly": True,
+        "secure": secure,
+        "samesite": samesite,
+        "path": "/",
+    }
 
 class CustomRefreshTokenView(TokenRefreshView):
     def post(self, request, *args, **kwargs):

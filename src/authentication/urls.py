@@ -3,6 +3,8 @@ from authentication.views import (
     LoginView, CustomRefreshTokenView, logout, RegisterView
 )
 
+app_name = 'authentication'
+
 
 urlpatterns = [
     path('register/', RegisterView.as_view(), name='register'),
