@@ -2,7 +2,15 @@ from typing import Any, Optional, Dict
 from rest_framework.test import APIClient
 import base64
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from constance import config
+
+try:
+    from constance import config
+except Exception:
+    config = None
+
+from django.contrib.auth import get_user_model
+
+UserModel = get_user_model()
 
 
 def login_payload(username: str = "testuser", password: str = "password") -> Dict[str, str]:
@@ -63,3 +71,13 @@ def configure_api_client(
         client.credentials()
 
     return client
+
+
+def sample_user(username: str = "testuser", email: Optional[str] = None, password: str = "password", **extra) -> Any:
+    email = email or f"{username}@example.com"
+    return UserModel.objects.create_user(username=username, email=email, password=password, **extra)
+
+
+def sample_superuser(username: str = "admin", email: Optional[str] = None, password: str = "admin", **extra) -> Any:
+    email = email or f"{username}@example.com"
+    return UserModel.objects.create_superuser(username=username, email=email, password=password, **extra)

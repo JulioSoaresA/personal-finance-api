@@ -3,9 +3,7 @@ from django.urls import reverse
 
 from rest_framework import status
 from rest_framework.test import APITestCase
-from rest_framework_simplejwt.tokens import RefreshToken
-from users.factories import UserFactory, SuperUserFactory
-from authentication.tests.helpers import login_payload, configure_api_client
+from authentication.tests.helpers import login_payload, configure_api_client, sample_user, sample_superuser
 
 
 class AuthenticationUserTest(APITestCase):
@@ -13,7 +11,7 @@ class AuthenticationUserTest(APITestCase):
         super().setUp()
 
         configure_api_client(self.client)
-        self.user = SuperUserFactory(username='admin', password='admin')
+        self.user = sample_superuser(username='admin', password='admin')
 
     def test_user_authentication_success(self):
         url = reverse("authentication:login")
@@ -27,7 +25,7 @@ class AuthenticationUserTest(APITestCase):
 
 class JWTAuthenticationTest(APITestCase):
     def setUp(self):
-        self.user = UserFactory(username='testuser', password='password')
+        self.user = sample_user(username='testuser', password='password')
         self.token_url = '/api/auth/login/'
 
     def test_login_success(self):
@@ -68,7 +66,7 @@ class JWTAuthenticationTest(APITestCase):
 
 class JWTProtectedRouteTest(APITestCase):
     def setUp(self):
-        self.user = UserFactory(username='testuser', password='password', email='testuser@example.com')
+        self.user = sample_user(username='testuser', password='password', email='testuser@example.com')
         self.login_url = '/api/auth/login/'  
         
         self.protected_url = '/api/posts/feed/'
