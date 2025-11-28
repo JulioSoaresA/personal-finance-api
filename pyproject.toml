@@ -20,6 +20,9 @@ dependencies = [
     "pytest-xdist (>=3.8.0,<4.0.0)",
     "factory-boy (>=3.3.3,<4.0.0)",
     "django-constance (>=4.3.4,<5.0.0)",
+    "ruff (>=0.14.6,<0.15.0)",
+    "pre-commit (>=4.5.0,<5.0.0)",
+    "black (>=25.11.0,<26.0.0)",
 ]
 
 
@@ -31,3 +34,36 @@ build-backend = "poetry.core.masonry.api"
 DJANGO_SETTINGS_MODULE = "personal_finance_api.settings"
 python_files = ["tests.py", "test_*.py", "*_tests.py"]
 addopts = "-q"
+
+[tool.ruff]
+src = ["src"]
+line-length = 88
+target-version = "py311"
+exclude = ["/.venv/", "build", "dist", ".git", ".venv", "*/migrations/*", "manage.py"]
+# select = [
+#     "F",
+#     "I",
+#     "N",
+#     "YTT",
+#     "S",
+#     "B",
+#     "COM",
+#     "C4",
+#     "DTZ",
+#     "DJ",
+#     "EM",
+#     "EXE",
+#     "ISC",
+#     "ICN",
+#     "G",
+#     "T20",
+#     "PYI",
+#     "Q",
+#     "RSE",
+#     "RET",
+#     "SIM",
+#     "PL",
+#     "TRY",
+#     "UP",
+# ]
+ignore = ["DJ001", "S107", "S106", "E501", "S311"]
