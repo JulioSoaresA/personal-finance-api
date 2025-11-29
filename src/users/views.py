@@ -1,9 +1,11 @@
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, mixins, viewsets
 from rest_framework.throttling import UserRateThrottle
 
 from users.serializers import UserSerializer
+
+User = get_user_model()
 
 
 class UserListView(mixins.ListModelMixin, viewsets.GenericViewSet):

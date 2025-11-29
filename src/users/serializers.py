@@ -1,6 +1,9 @@
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
+
+
+User = get_user_model()
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
@@ -9,7 +12,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ("username", "email", "password", "password2")
+        fields = ("username", "email", "password", "password2", "default_currency")
 
     def validate_username(self, value):
         if User.objects.filter(username__iexact=value).exists():
@@ -36,15 +39,22 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         username = validated_data.pop("username")
         email = validated_data.pop("email", None)
         password = validated_data.pop("password")
+        default_currency = validated_data.pop("default_currency", None)
 
         username_norm = username.lower()
         email_norm = email.lower() if email else email
 
-        user = User.objects.create_user(username_norm, email_norm, password)
+        # pass default_currency if provided
+        if default_currency:
+            user = User.objects.create_user(
+                username_norm, email_norm, password, default_currency=default_currency
+            )
+        else:
+            user = User.objects.create_user(username_norm, email_norm, password)
         return user
 
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ("id", "username", "email", "date_joined")
+        fields = ("id", "username", "email", "date_joined", "default_currency")
