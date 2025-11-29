@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     "drf_yasg",
     "authentication",
     "users",
+    "transactions",
 ]
 
 AUTH_USER_MODEL = "users.User"
