@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     "drf_yasg",
     "authentication",
     "users",
+    "django_filters",
     "transactions",
 ]
 
