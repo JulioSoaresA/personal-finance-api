@@ -22,6 +22,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/auth/", include("authentication.urls", namespace="authentication")),
     path("api/users/", include("users.urls", namespace="users")),
+    path("api/transactions/", include("transactions.urls", namespace="transactions")),
     path(
         "api/docs/",
         schema_view.with_ui("swagger", cache_timeout=0),
