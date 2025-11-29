@@ -1,6 +1,9 @@
 dc_up:
 	@docker compose up -d
 
+dc_build:
+	@docker compose build --no-cache
+
 dc_down:
 	@docker compose down -v
 
@@ -17,12 +20,12 @@ test_cov: dc_up
 	@pytest -n auto --cov=src --cov-report=term-missing --cov-report=html
 
 migration:
-	@cd src && poetry run python manage.py makemigrations
+	@docker compose exec app bash -lc "cd /app/src && poetry run python manage.py makemigrations"
 
 migrate: dc_up
-	@cd src && poetry run python manage.py migrate
+	@docker compose exec app bash -lc "cd /app/src && poetry run python manage.py migrate"
 
 server: dc_up
-	@cd src && poetry run python manage.py runserver 0.0.0.0:8000
+	@docker compose exec -T app bash -lc "cd /app/src && poetry run python manage.py runserver 0.0.0.0:8000"
 
-.PHONY: test test_cov dc_up dc_down migration migrate server lint pre_commit
+.PHONY: test test_cov dc_up dc_down dc_build migration migrate server lint pre_commit
