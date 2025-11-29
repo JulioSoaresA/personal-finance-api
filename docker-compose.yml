@@ -3,7 +3,7 @@ services:
   app:
     build: .
     container_name: personal-finance-api-app
-    command: gunicorn personal_finance_api.wsgi:application --bind 0.0.0.0:8000
+    command: bash -lc "cd /app/src && gunicorn personal_finance_api.wsgi:application --bind 0.0.0.0:8000"
     volumes:
       - .:/app
     ports:
@@ -12,14 +12,15 @@ services:
       - db
     environment:
       - DJANGO_SETTINGS_MODULE=personal_finance_api.settings
+      - PYTHONPATH=/app/src
       - DATABASE_URL=postgres://postgres:postgres@db:5432/personal_finance
   db:
     image: postgres:15
     container_name: personal-finance-api-db
     environment:
-      POSTGRES_DB: personal_finance
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
     ports:
       - "5432:5432"
     volumes:
