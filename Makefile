@@ -20,12 +20,12 @@ test_cov: dc_up
 	@pytest -n auto --cov=src --cov-report=term-missing --cov-report=html
 
 migration:
-	@docker compose exec app bash -lc "cd /app/src && poetry run python manage.py makemigrations"
+	@cd src && poetry run python manage.py makemigrations
 
 migrate: dc_up
-	@docker compose exec app bash -lc "cd /app/src && poetry run python manage.py migrate"
+	@cd src && poetry run python manage.py migrate
 
-server: dc_up
-	@docker compose exec -T app bash -lc "cd /app/src && poetry run python manage.py runserver 0.0.0.0:8000"
+server: dc_up migrate
+	@cd src && poetry run python manage.py runserver
 
 .PHONY: test test_cov dc_up dc_down dc_build migration migrate server lint pre_commit
