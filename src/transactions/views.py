@@ -5,7 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import ValidationError
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import Sum
-from transactions.models import Transaction, Account
+from transactions.models import Transaction, Account, Category
 from django.db.models import F, Q, Value
 from django.db.models.functions import Coalesce
 from django.db.models.fields import DecimalField
@@ -15,8 +15,42 @@ from transactions.serializers import (
     DashboardSerializer,
     AccountListSerializer,
     AccountWriteSerializer,
+    CategorySerializer,
+    CategoryWriteSerializer,
 )
 from transactions.services import TransactionService
+
+
+class CategoryViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsAuthenticated]
+    filter_backends = [
+        DjangoFilterBackend,
+        filters.SearchFilter,
+        filters.OrderingFilter,
+    ]
+    filterset_fields = ["type"]
+    search_fields = ["name"]
+    ordering = ["name"]
+
+    def get_serializer_class(self):
+        if self.action in ["create", "update", "partial_update"]:
+            return CategoryWriteSerializer
+        return CategorySerializer
+
+    def get_queryset(self):
+        return Category.objects.filter(user=self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+    def perform_destroy(self, instance):
+        if instance.transactions.exists():
+            raise ValidationError(
+                {
+                    "error": "Não é possível excluir uma categoria que possui transações associadas."
+                }
+            )
+        instance.delete()
 
 
 class TransactionViewSet(viewsets.ModelViewSet):

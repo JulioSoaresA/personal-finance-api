@@ -1,7 +1,7 @@
 from django.urls import include, path
 from rest_framework import routers
 
-from transactions.views import TransactionViewSet, AccountViewSet
+from transactions.views import TransactionViewSet, AccountViewSet, CategoryViewSet
 
 app_name = "transactions"
 
@@ -9,6 +9,7 @@ router = routers.DefaultRouter()
 
 router.register(r"transactions", TransactionViewSet, basename="transactions")
 router.register(r"accounts", AccountViewSet, basename="accounts")
+router.register(r"categories", CategoryViewSet, basename="categories")
 
 urlpatterns = [
     path("", include(router.urls)),

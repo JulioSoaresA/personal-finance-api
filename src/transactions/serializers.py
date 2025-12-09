@@ -8,6 +8,41 @@ class CategorySerializer(serializers.ModelSerializer):
         fields = ["id", "name", "icon", "color", "type"]
 
 
+class CategoryWriteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        fields = ["id", "name", "icon", "color", "type"]
+        read_only_fields = ["id"]
+
+    def validate_color(self, value):
+        import re
+
+        if not re.match(r"^#[0-9A-Fa-f]{6}$", value):
+            raise serializers.ValidationError(
+                "Cor deve estar no formato HEX (#RRGGBB). Exemplo: #FF5733"
+            )
+        return value
+
+    def validate(self, data):
+        user = self.context["request"].user
+        name = data.get("name")
+        category_type = data.get("type")
+
+        queryset = Category.objects.filter(user=user, name=name, type=category_type)
+
+        if self.instance:
+            queryset = queryset.exclude(pk=self.instance.pk)
+
+        if queryset.exists():
+            raise serializers.ValidationError(
+                {
+                    "name": f"Você já possui uma categoria '{name}' do tipo {category_type}."
+                }
+            )
+
+        return data
+
+
 class AccountSerializer(serializers.ModelSerializer):
     class Meta:
         model = Account
