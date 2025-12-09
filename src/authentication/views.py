@@ -106,8 +106,22 @@ class LoginView(TokenObtainPairView):
             return res
 
         except ValidationError as e:
+            error_msg = "Invalid credentials"
+            if hasattr(e, "detail") and e.detail:
+                if isinstance(e.detail, dict):
+                    first_key = next(iter(e.detail))
+                    error_msg = (
+                        str(e.detail[first_key][0])
+                        if isinstance(e.detail[first_key], list)
+                        else str(e.detail[first_key])
+                    )
+                elif isinstance(e.detail, list):
+                    error_msg = str(e.detail[0])
+                else:
+                    error_msg = str(e.detail)
+
             return Response(
-                {"success": False, "errors": e.detail},
+                {"success": False, "error": error_msg},
                 status=status.HTTP_400_BAD_REQUEST,
             )
         except Exception as e:

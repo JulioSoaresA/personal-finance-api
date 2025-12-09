@@ -17,8 +17,9 @@ UserModel = get_user_model()
 def login_payload(
     username: str = "testuser",
     password: str = "password",
+    email: str | None = None,
 ) -> dict[str, str]:
-    return {"username": username, "password": password}
+    return {"email": email or f"{username}@example.com", "password": password}
 
 
 def user_data(
