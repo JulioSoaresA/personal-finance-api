@@ -64,7 +64,6 @@ class TransactionCreateSerializer(serializers.ModelSerializer):
         decimal_places=2,
         required=False,
         write_only=True,
-        help_text="Informe se já souber o valor exato da parcela (com juros)",
     )
 
     class Meta:
