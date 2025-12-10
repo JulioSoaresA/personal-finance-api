@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
+from django.utils.translation import gettext_lazy as _
 
 
 User = get_user_model()
@@ -17,18 +18,20 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
     def validate_username(self, value):
         if User.objects.filter(username__iexact=value).exists():
             raise serializers.ValidationError(
-                "A user with that username already exists.",
+                _("A user with that username already exists."),
             )
         return value
 
     def validate_email(self, value):
         if value and User.objects.filter(email__iexact=value).exists():
-            raise serializers.ValidationError("A user with that email already exists.")
+            raise serializers.ValidationError(
+                _("A user with that email already exists.")
+            )
         return value
 
     def validate(self, data):
         if data.get("password") != data.get("password2"):
-            raise serializers.ValidationError("Passwords do not match")
+            raise serializers.ValidationError(_("Passwords do not match"))
 
         validate_password(data.get("password"))
 
@@ -44,7 +47,6 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         username_norm = username.lower()
         email_norm = email.lower() if email else email
 
-        # pass default_currency if provided
         if default_currency:
             user = User.objects.create_user(
                 username_norm, email_norm, password, default_currency=default_currency

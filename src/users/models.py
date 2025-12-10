@@ -6,9 +6,9 @@ from django.utils.translation import gettext_lazy as _
 
 class User(AbstractUser, BaseModel):
     CURRENCY_CHOICES = (
-        ("USD", "US Dollar"),
-        ("BRL", "Brazilian Real"),
-        ("EUR", "Euro"),
+        ("USD", _("US Dollar")),
+        ("BRL", _("Brazilian Real")),
+        ("EUR", _("Euro")),
     )
     email = models.EmailField(_("email address"), unique=True)
 

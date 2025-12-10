@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-09 22:01-0300\n"
+"POT-Creation-Date: 2025-12-09 22:05-0300\n"
 "PO-Revision-Date: 2025-12-09 21:41-0300\n"
 "Last-Translator: Júlio César Almeida Soares juliocsoaresa1@gmail.com\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -197,6 +197,30 @@ msgstr ""
 "Não é possível excluir uma conta que tenha transações. Arquive-a ou delete "
 "as transações primeiro."
 
+#: users/models.py:9
+msgid "US Dollar"
+msgstr "Dólar Americano"
+
+#: users/models.py:10
+msgid "Brazilian Real"
+msgstr "Real Brasileiro"
+
+#: users/models.py:11
+msgid "Euro"
+msgstr "Euro"
+
 #: users/models.py:13
 msgid "email address"
 msgstr "endereço de email"
+
+#: users/serializers.py:21
+msgid "A user with that username already exists."
+msgstr "Já existe um usuário com esse nome de usuário."
+
+#: users/serializers.py:28
+msgid "A user with that email already exists."
+msgstr "Já existe um usuário com esse email."
+
+#: users/serializers.py:34
+msgid "Passwords do not match"
+msgstr "As senhas não coincidem."
