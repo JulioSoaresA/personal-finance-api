@@ -6,8 +6,8 @@ from django.utils.translation import gettext_lazy as _
 
 class Category(BaseModel):
     class TypeChoices(models.TextChoices):
-        INCOME = "INCOME", "Income"
-        EXPENSE = "EXPENSE", "Expense"
+        INCOME = "INCOME", _("Income")
+        EXPENSE = "EXPENSE", _("Expense")
 
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,

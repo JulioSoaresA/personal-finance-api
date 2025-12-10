@@ -13,7 +13,10 @@ class User(AbstractUser, BaseModel):
     email = models.EmailField(_("email address"), unique=True)
 
     default_currency = models.CharField(
-        max_length=3, choices=CURRENCY_CHOICES, default="USD"
+        max_length=3,
+        choices=CURRENCY_CHOICES,
+        default="USD",
+        verbose_name=_("default currency"),
     )
 
     USERNAME_FIELD = "email"
