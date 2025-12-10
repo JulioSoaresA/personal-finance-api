@@ -28,4 +28,7 @@ migrate: dc_up
 server: dc_up migrate
 	@cd src && poetry run python manage.py runserver
 
-.PHONY: test test_cov dc_up dc_down dc_build migration migrate server lint pre_commit
+messages:
+	@cd src && poetry run python manage.py makemessages -l pt_BR
+
+.PHONY: test test_cov dc_up dc_down dc_build migration migrate server lint pre_commit messages

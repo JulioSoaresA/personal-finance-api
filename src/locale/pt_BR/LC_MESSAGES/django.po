@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-09 22:05-0300\n"
+"POT-Creation-Date: 2025-12-09 22:09-0300\n"
 "PO-Revision-Date: 2025-12-09 21:41-0300\n"
 "Last-Translator: Júlio César Almeida Soares juliocsoaresa1@gmail.com\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -212,6 +212,10 @@ msgstr "Euro"
 #: users/models.py:13
 msgid "email address"
 msgstr "endereço de email"
+
+#: users/models.py:19
+msgid "default currency"
+msgstr "moeda padrão"
 
 #: users/serializers.py:21
 msgid "A user with that username already exists."
