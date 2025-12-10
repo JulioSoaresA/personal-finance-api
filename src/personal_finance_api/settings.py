@@ -119,6 +119,8 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = "pt-br"
 
+LOCALE_PATHS = [os.path.join(os.path.dirname(os.path.realpath(__name__)), "locale")]
+
 TIME_ZONE = "America/Recife"
 
 USE_I18N = True

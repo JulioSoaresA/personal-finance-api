@@ -1,0 +1,194 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# Júlio César Almeida Soares <juliocsoaresa1@gmail.com>, 2025.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-12-09 21:56-0300\n"
+"PO-Revision-Date: 2025-12-09 21:41-0300\n"
+"Last-Translator: Júlio César Almeida Soares juliocsoaresa1@gmail.com\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+#: transactions/models.py:16 transactions/models.py:56
+#: transactions/models.py:86
+msgid "User"
+msgstr "Usuário"
+
+#: transactions/models.py:18
+msgid "Category Name"
+msgstr "Nome da Categoria"
+
+#: transactions/models.py:22
+msgid "Slug of the icon (ex: 'mdi-home')"
+msgstr "Slug do ícone (ex: 'mdi-home')"
+
+#: transactions/models.py:23
+msgid "Icon"
+msgstr "Ícone"
+
+#: transactions/models.py:28
+msgid "HEX Color"
+msgstr "Cor em HEX"
+
+#: transactions/models.py:29
+msgid "Color"
+msgstr "Cor"
+
+#: transactions/models.py:32 transactions/models.py:110
+msgid "Type"
+msgstr "Tipo"
+
+#: transactions/models.py:36 transactions/models.py:100
+msgid "Category"
+msgstr "Categoria"
+
+#: transactions/models.py:37
+msgid "Categories"
+msgstr "Categorias"
+
+#: transactions/models.py:58
+msgid "Account Name"
+msgstr "Nome da Conta"
+
+#: transactions/models.py:63
+msgid "Account Type"
+msgstr "Tipo da Conta"
+
+#: transactions/models.py:66
+msgid "Initial Balance"
+msgstr "Saldo Inicial"
+
+#: transactions/models.py:69
+msgid "Closing Day"
+msgstr "Dia de Fechamento"
+
+#: transactions/models.py:70
+msgid "Due Day"
+msgstr "Dia de Vencimento"
+
+#: transactions/models.py:73 transactions/models.py:93
+msgid "Account"
+msgstr "Conta"
+
+#: transactions/models.py:81
+msgid "Income"
+msgstr "Receita"
+
+#: transactions/models.py:82
+msgid "Expense"
+msgstr "Despesa"
+
+#: transactions/models.py:83
+msgid "Transfer"
+msgstr "Transferência"
+
+#: transactions/models.py:103
+msgid "Description"
+msgstr "Descrição"
+
+#: transactions/models.py:105
+msgid "Value"
+msgstr "Valor"
+
+#: transactions/models.py:107
+msgid "Competence Date"
+msgstr "Data da Competência"
+
+#: transactions/models.py:108
+msgid "Paid"
+msgstr "Pago"
+
+#: transactions/models.py:116
+msgid "ID that groups installments of the same purchase"
+msgstr "ID que agrupa parcelas de uma mesma compra"
+
+#: transactions/models.py:117
+msgid "Installment Group ID"
+msgstr "ID do Grupo de Parcelas"
+
+#: transactions/models.py:122
+msgid "Current installment number (ex: 1)"
+msgstr "Número da parcela atual (ex: 1)"
+
+#: transactions/models.py:123
+msgid "Installment Current"
+msgstr "Parcela Atual"
+
+#: transactions/models.py:128
+msgid "Total installments (ex: 12)"
+msgstr "Número total de parcelas (ex: 12)"
+
+#: transactions/models.py:129
+msgid "Installment Total"
+msgstr "Número Total de Parcelas"
+
+#: transactions/models.py:132
+msgid "Notes"
+msgstr "Notas"
+
+#: transactions/models.py:135
+msgid "Transaction"
+msgstr "Transação"
+
+#: transactions/models.py:136
+msgid "Transactions"
+msgstr "Transações"
+
+#: transactions/serializers.py:23
+msgid "Color should be in the format HEX (#RRGGBB). Example: #FF5733"
+msgstr "Cor deve estar no formato HEX (#RRGGBB). Exemplo: #FF5733"
+
+#: transactions/serializers.py:39
+msgid "You already have a category with this name and type."
+msgstr "Você já possui uma categoria com este nome e tipo."
+
+#: transactions/serializers.py:100
+msgid ""
+"Necessary to inform the number of installments when the installment value is "
+"fixed."
+msgstr ""
+"Necessário informar o número de parcelas quando o valor da parcela for fixo."
+
+#: transactions/serializers.py:107
+msgid "Inform the 'value' (total) or 'installment_value'"
+msgstr "Informe o 'valor' (total) ou 'valor da parcela'"
+
+#: transactions/serializers.py:189
+msgid "For Credit Card, closing and due days are required."
+msgstr ""
+"Para Cartão de Crédito, dia de fechamento e dia de vencimento são "
+"obrigatórios."
+
+#: transactions/views.py:52
+msgid ""
+"It is not possible to delete a category that has associated transactions."
+msgstr "Não é possível excluir uma categoria que tenha transações associadas."
+
+#: transactions/views.py:131
+msgid "This transaction is not part of a payment plan."
+msgstr "Esta transação não faz parte de um plano de pagamento."
+
+#: transactions/views.py:136
+msgid "The installments were successfully removed."
+msgstr "As parcelas foram removidas com sucesso."
+
+#: transactions/views.py:184
+msgid ""
+"It is not possible to delete an account that has transactions. Archive it or "
+"delete the transactions first."
+msgstr ""
+"Não é possível excluir uma conta que tenha transações. Arquive-a ou delete "
+"as transações primeiro."
+
+#: users/models.py:13
+msgid "email address"
+msgstr "endereço de email"
