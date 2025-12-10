@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from transactions.models import Transaction, Category, Account
+from django.utils.translation import gettext_lazy as _
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -19,7 +20,7 @@ class CategoryWriteSerializer(serializers.ModelSerializer):
 
         if not re.match(r"^#[0-9A-Fa-f]{6}$", value):
             raise serializers.ValidationError(
-                "Cor deve estar no formato HEX (#RRGGBB). Exemplo: #FF5733"
+                _("Color should be in the format HEX (#RRGGBB). Example: #FF5733")
             )
         return value
 
@@ -35,9 +36,7 @@ class CategoryWriteSerializer(serializers.ModelSerializer):
 
         if queryset.exists():
             raise serializers.ValidationError(
-                {
-                    "name": f"Você já possui uma categoria '{name}' do tipo {category_type}."
-                }
+                {"name": _("You already have a category with this name and type.")}
             )
 
         return data
@@ -86,9 +85,9 @@ class TransactionCreateSerializer(serializers.ModelSerializer):
     def validate(self, data):
         user = self.context["request"].user
         if data.get("category") and data["category"].user != user:
-            raise serializers.ValidationError({"category_id": "Categoria inválida."})
+            raise serializers.ValidationError({"category_id": "Invalid category."})
         if data["account"].user != user:
-            raise serializers.ValidationError({"account_id": "Conta inválida."})
+            raise serializers.ValidationError({"account_id": "Invalid account."})
 
         installments = data.get("installment_total")
         inst_value = data.get("installment_value")
@@ -97,13 +96,15 @@ class TransactionCreateSerializer(serializers.ModelSerializer):
         if inst_value and not installments:
             raise serializers.ValidationError(
                 {
-                    "installment_total": "Necessário informar o número de parcelas quando o valor da parcela é fixado."
+                    "installment_total": _(
+                        "Necessary to inform the number of installments when the installment value is fixed."
+                    )
                 }
             )
 
         if not total_value and not inst_value:
             raise serializers.ValidationError(
-                "Informe o 'value' (total) ou 'installment_value'."
+                _("Inform the 'value' (total) or 'installment_value'")
             )
 
         return data
@@ -185,6 +186,6 @@ class AccountWriteSerializer(serializers.ModelSerializer):
         if data.get("account_type") == "CREDIT_CARD":
             if not data.get("closing_day") or not data.get("due_day"):
                 raise serializers.ValidationError(
-                    "Para Cartão de Crédito, os dias de fechamento e vencimento são obrigatórios."
+                    _("For Credit Card, closing and due days are required.")
                 )
         return data

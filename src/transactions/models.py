@@ -1,6 +1,7 @@
 from django.db import models
 from django.conf import settings
 from core.models import BaseModel
+from django.utils.translation import gettext_lazy as _
 
 
 class Category(BaseModel):
@@ -9,18 +10,31 @@ class Category(BaseModel):
         EXPENSE = "EXPENSE", "Expense"
 
     user = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="categories"
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name="categories",
+        verbose_name=_("User"),
     )
-    name = models.CharField(max_length=50)
+    name = models.CharField(max_length=50, verbose_name=_("Category Name"))
     icon = models.CharField(
-        max_length=50, blank=True, help_text="Slug do ícone (ex: 'mdi-home')"
+        max_length=50,
+        blank=True,
+        help_text=_("Slug of the icon (ex: 'mdi-home')"),
+        verbose_name=_("Icon"),
     )
-    color = models.CharField(max_length=7, default="#000000", help_text="HEX Color")
-    type = models.CharField(max_length=7, choices=TypeChoices.choices)
+    color = models.CharField(
+        max_length=7,
+        default="#000000",
+        help_text=_("HEX Color"),
+        verbose_name=_("Color"),
+    )
+    type = models.CharField(
+        max_length=7, choices=TypeChoices.choices, verbose_name=_("Type")
+    )
 
     class Meta:
-        verbose_name = "Categoria"
-        verbose_name_plural = "Categorias"
+        verbose_name = _("Category")
+        verbose_name_plural = _("Categories")
         unique_together = ("user", "name", "type")
 
     def __str__(self) -> str:
@@ -36,21 +50,27 @@ class Account(BaseModel):
         CREDIT_CARD = "CREDIT_CARD", "Cartão de Crédito"
 
     user = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="accounts"
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name="accounts",
+        verbose_name=_("User"),
     )
-    name = models.CharField(max_length=50, verbose_name="Nome da Conta")
+    name = models.CharField(max_length=50, verbose_name=_("Account Name"))
     account_type = models.CharField(
-        max_length=20, choices=AccountType.choices, default=AccountType.CHECKING
+        max_length=20,
+        choices=AccountType.choices,
+        default=AccountType.CHECKING,
+        verbose_name=_("Account Type"),
     )
     initial_balance = models.DecimalField(
-        max_digits=12, decimal_places=2, default=0.00, verbose_name="Saldo Inicial"
+        max_digits=12, decimal_places=2, default=0.00, verbose_name=_("Initial Balance")
     )
 
-    closing_day = models.PositiveSmallIntegerField(verbose_name="Dia Fechamento")
-    due_day = models.PositiveSmallIntegerField(verbose_name="Dia Vencimento")
+    closing_day = models.PositiveSmallIntegerField(verbose_name=_("Closing Day"))
+    due_day = models.PositiveSmallIntegerField(verbose_name=_("Due Day"))
 
     class Meta:
-        verbose_name = "Conta/Carteira"
+        verbose_name = _("Account")
 
     def __str__(self):
         return f"{self.name} - {self.get_account_type_display()}"
@@ -58,41 +78,62 @@ class Account(BaseModel):
 
 class Transaction(BaseModel):
     class TransactionType(models.TextChoices):
-        INCOME = "INCOME", "Receita"
-        EXPENSE = "EXPENSE", "Despesa"
-        TRANSFER = "TRANSFER", "Transferência"
+        INCOME = "INCOME", _("Income")
+        EXPENSE = "EXPENSE", _("Expense")
+        TRANSFER = "TRANSFER", _("Transfer")
 
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name=_("User")
+    )
 
     account = models.ForeignKey(
-        "transactions.Account", on_delete=models.PROTECT, related_name="transactions"
+        "transactions.Account",
+        on_delete=models.PROTECT,
+        related_name="transactions",
+        verbose_name=_("Account"),
     )
     category = models.ForeignKey(
         "transactions.Category",
         on_delete=models.SET_NULL,
         null=True,
         related_name="transactions",
+        verbose_name=_("Category"),
     )
 
-    description = models.CharField(max_length=255)
-    value = models.DecimalField(max_digits=12, decimal_places=2)
-    date = models.DateField(verbose_name="Data da Competência")
-    paid = models.BooleanField(default=True, verbose_name="Efetivado")
-    type = models.CharField(max_length=10, choices=TransactionType.choices)
+    description = models.CharField(max_length=255, verbose_name=_("Description"))
+    value = models.DecimalField(
+        max_digits=12, decimal_places=2, verbose_name=_("Value")
+    )
+    date = models.DateField(verbose_name=_("Competence Date"))
+    paid = models.BooleanField(default=True, verbose_name=_("Paid"))
+    type = models.CharField(
+        max_length=10, choices=TransactionType.choices, verbose_name=_("Type")
+    )
 
     installment_group_id = models.UUIDField(
-        null=True, blank=True, help_text="ID que agrupa parcelas da mesma compra"
+        null=True,
+        blank=True,
+        help_text=_("ID that groups installments of the same purchase"),
+        verbose_name=_("Installment Group ID"),
     )
     installment_current = models.PositiveIntegerField(
-        null=True, blank=True, help_text="Número da parcela atual (ex: 1)"
+        null=True,
+        blank=True,
+        help_text=_("Current installment number (ex: 1)"),
+        verbose_name=_("Installment Current"),
     )
     installment_total = models.PositiveIntegerField(
-        null=True, blank=True, help_text="Total de parcelas (ex: 12)"
+        null=True,
+        blank=True,
+        help_text=_("Total installments (ex: 12)"),
+        verbose_name=_("Installment Total"),
     )
 
-    notes = models.TextField(blank=True, null=True)
+    notes = models.TextField(blank=True, null=True, verbose_name=_("Notes"))
 
     class Meta:
+        verbose_name = _("Transaction")
+        verbose_name_plural = _("Transactions")
         ordering = ["-date", "-created_at"]
         indexes = [
             models.Index(fields=["user", "date"]),

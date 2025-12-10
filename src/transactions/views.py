@@ -19,6 +19,7 @@ from transactions.serializers import (
     CategoryWriteSerializer,
 )
 from transactions.services import TransactionService
+from django.utils.translation import gettext_lazy as _
 
 
 class CategoryViewSet(viewsets.ModelViewSet):
@@ -47,7 +48,9 @@ class CategoryViewSet(viewsets.ModelViewSet):
         if instance.transactions.exists():
             raise ValidationError(
                 {
-                    "error": "Não é possível excluir uma categoria que possui transações associadas."
+                    "error": _(
+                        "It is not possible to delete a category that has associated transactions."
+                    )
                 }
             )
         instance.delete()
@@ -125,14 +128,12 @@ class TransactionViewSet(viewsets.ModelViewSet):
 
         if not transaction.installment_group_id:
             return Response(
-                {"error": "Esta transação não faz parte de um parcelamento."},
+                {"error": _("This transaction is not part of a payment plan.")},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        count = TransactionService.delete_installment_series(transaction)
-
         return Response(
-            {"message": f"{count} parcelas foram removidas com sucesso."},
+            {"message": _("The installments were successfully removed.")},
             status=status.HTTP_204_NO_CONTENT,
         )
 
@@ -179,7 +180,9 @@ class AccountViewSet(viewsets.ModelViewSet):
         if instance.transactions.exists():
             raise ValidationError(
                 {
-                    "error": "Não é possível excluir uma conta que possui transações. Arquive-a ou exclua as transações primeiro."
+                    "error": _(
+                        "It is not possible to delete an account that has transactions. Archive it or delete the transactions first."
+                    )
                 }
             )
 
