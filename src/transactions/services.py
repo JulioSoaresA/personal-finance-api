@@ -1,10 +1,32 @@
 from decimal import Decimal
-from celery import uuid
+import uuid
 from transactions.models import Transaction
 from dateutil.relativedelta import relativedelta
 
 
 class TransactionService:
+    @staticmethod
+    def create_transaction(user, data: dict) -> list[Transaction]:
+        installment_total = data.get("installment_total")
+
+        if installment_total and installment_total > 1:
+            return TransactionService._create_installment_series(
+                user=user, data=data, total_count=installment_total
+            )
+
+        transaction = Transaction.objects.create(
+            user=user,
+            account=data.get("account"),
+            category=data.get("category"),
+            type=data.get("type"),
+            paid=data.get("paid", True),
+            description=data.get("description"),
+            value=data.get("value"),
+            date=data.get("date"),
+            notes=data.get("notes", ""),
+        )
+        return [transaction]
+
     @staticmethod
     def _create_installment_series(
         user, data: dict, total_count: int
