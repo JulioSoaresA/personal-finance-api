@@ -8,6 +8,7 @@ from rest_framework.response import Response
 from rest_framework.throttling import AnonRateThrottle
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from django.utils.translation import gettext_lazy as _
 
 from users.serializers import UserRegistrationSerializer, UserSerializer
 
@@ -106,7 +107,7 @@ class LoginView(TokenObtainPairView):
             return res
 
         except ValidationError as e:
-            error_msg = "Invalid credentials"
+            error_msg = _("Invalid credentials")
             if hasattr(e, "detail") and e.detail:
                 if isinstance(e.detail, dict):
                     first_key = next(iter(e.detail))
@@ -146,7 +147,7 @@ def logout(request):
                 pass
 
         response = Response(
-            {"success": "Logged out successfully"},
+            {"success": _("Logged out successfully")},
             status=status.HTTP_200_OK,
         )
 

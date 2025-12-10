@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-09 21:56-0300\n"
+"POT-Creation-Date: 2025-12-09 22:01-0300\n"
 "PO-Revision-Date: 2025-12-09 21:41-0300\n"
 "Last-Translator: Júlio César Almeida Soares juliocsoaresa1@gmail.com\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,6 +17,14 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+#: authentication/views.py:110
+msgid "Invalid credentials"
+msgstr "Credenciais inválidas"
+
+#: authentication/views.py:150
+msgid "Logged out successfully"
+msgstr "Deslogado com sucesso"
 
 #: transactions/models.py:16 transactions/models.py:56
 #: transactions/models.py:86
