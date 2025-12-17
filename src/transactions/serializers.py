@@ -149,7 +149,7 @@ class DashboardSerializer(serializers.Serializer):
     total_expense = serializers.DecimalField(max_digits=12, decimal_places=2)
     balance = serializers.DecimalField(max_digits=12, decimal_places=2)
 
-    chart_data = CategoryChartDataSerializer(many=True, required=False)
+    expense_by_category = CategoryChartDataSerializer(many=True, required=False)
 
 
 class AccountListSerializer(serializers.ModelSerializer):

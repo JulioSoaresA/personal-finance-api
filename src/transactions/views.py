@@ -20,6 +20,8 @@ from transactions.serializers import (
 )
 from transactions.services import TransactionService
 from django.utils.translation import gettext_lazy as _
+from datetime import date
+from rest_framework.views import APIView
 
 
 class CategoryViewSet(viewsets.ModelViewSet):
@@ -136,6 +138,43 @@ class TransactionViewSet(viewsets.ModelViewSet):
             {"message": _("The installments were successfully removed.")},
             status=status.HTTP_204_NO_CONTENT,
         )
+
+
+class DashboardView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        today = date.today()
+        start_date = request.query_params.get("start_date", today.replace(day=1))
+        end_date = request.query_params.get("end_date", today)
+
+        queryset = Transaction.objects.filter(
+            user=request.user, date__range=[start_date, end_date]
+        )
+
+        summary = queryset.aggregate(
+            income=Coalesce(
+                Sum("value", filter=Q(type="INCOME")),
+                Value(0, output_field=DecimalField()),
+            )
+        )
+
+        category_data = (
+            queryset.filter(type="EXPENSE")
+            .values("category")
+            .annotate(total=Sum("value"))
+            .order_by("-total")
+        )
+
+        data = {
+            "total_income": summary["income"],
+            "total_expense": summary["expense"],
+            "balance": summary["income"] - summary["expense"],
+            "expense_by_category": category_data,
+        }
+
+        serializer = DashboardSerializer(data)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class AccountViewSet(viewsets.ModelViewSet):
