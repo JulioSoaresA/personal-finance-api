@@ -20,7 +20,9 @@ class UserListView(mixins.ListModelMixin, viewsets.GenericViewSet):
         return queryset
 
 
-class UserProfileView(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
+class UserProfileView(
+    mixins.RetrieveModelMixin, mixins.UpdateModelMixin, viewsets.GenericViewSet
+):
     serializer_class = UserSerializer
     throttle_classes = [UserRateThrottle]
 
