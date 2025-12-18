@@ -13,7 +13,15 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ("username", "email", "password", "password2", "default_currency")
+        fields = (
+            "username",
+            "email",
+            "first_name",
+            "last_name",
+            "password",
+            "password2",
+            "default_currency",
+        )
 
     def validate_username(self, value):
         if User.objects.filter(username__iexact=value).exists():
@@ -29,6 +37,16 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             )
         return value
 
+    def validate_first_name(self, value):
+        if not value:
+            raise serializers.ValidationError(_("First name is required."))
+        return value
+
+    def validate_last_name(self, value):
+        if not value:
+            raise serializers.ValidationError(_("Last name is required."))
+        return value
+
     def validate(self, data):
         if data.get("password") != data.get("password2"):
             raise serializers.ValidationError(_("Passwords do not match"))
@@ -41,6 +59,8 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         validated_data.pop("password2", None)
         username = validated_data.pop("username")
         email = validated_data.pop("email", None)
+        first_name = validated_data.pop("first_name", None)
+        last_name = validated_data.pop("last_name", None)
         password = validated_data.pop("password")
         default_currency = validated_data.pop("default_currency", None)
 
@@ -49,10 +69,21 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 
         if default_currency:
             user = User.objects.create_user(
-                username_norm, email_norm, password, default_currency=default_currency
+                username_norm,
+                email_norm,
+                password,
+                first_name=first_name,
+                last_name=last_name,
+                default_currency=default_currency,
             )
         else:
-            user = User.objects.create_user(username_norm, email_norm, password)
+            user = User.objects.create_user(
+                username_norm,
+                email_norm,
+                password,
+                first_name=first_name,
+                last_name=last_name,
+            )
         return user
 
 
