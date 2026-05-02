@@ -11,6 +11,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from django.utils.translation import gettext_lazy as _
 
 from users.serializers import UserRegistrationSerializer, UserSerializer
+from authentication.serializers import CustomTokenObtainPairSerializer
 
 User = get_user_model()
 
@@ -72,6 +73,7 @@ class RegisterView(generics.CreateAPIView):
 
 
 class LoginView(TokenObtainPairView):
+    serializer_class = CustomTokenObtainPairSerializer
     throttle_classes = [AnonRateThrottle]
 
     def post(self, request, *args, **kwargs):
@@ -111,11 +113,12 @@ class LoginView(TokenObtainPairView):
             if hasattr(e, "detail") and e.detail:
                 if isinstance(e.detail, dict):
                     first_key = next(iter(e.detail))
-                    error_msg = (
+                    field_error = (
                         str(e.detail[first_key][0])
                         if isinstance(e.detail[first_key], list)
                         else str(e.detail[first_key])
                     )
+                    error_msg = f"{first_key}: {field_error}"
                 elif isinstance(e.detail, list):
                     error_msg = str(e.detail[0])
                 else:
