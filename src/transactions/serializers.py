@@ -53,7 +53,7 @@ class AccountSerializer(serializers.ModelSerializer):
         fields = ["id", "name", "account_type"]
 
 
-class TransactionCreateSerializer(serializers.ModelSerializer):
+class TransactionWriteSerializer(serializers.ModelSerializer):
     category_id = serializers.PrimaryKeyRelatedField(
         queryset=Category.objects.all(), source="category", write_only=True
     )
@@ -89,9 +89,16 @@ class TransactionCreateSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         user = self.context["request"].user
-        if data.get("category") and data["category"].user != user:
+
+        category = data.get("category")
+        if category and category.user != user:
             raise InvalidCategoryError()
-        if data["account"].user != user:
+
+        account = data.get("account")
+        if account and account.user != user:
+            raise InvalidAccountError()
+
+        if not self.instance and not account:
             raise InvalidAccountError()
 
         installments = data.get("installment_total")

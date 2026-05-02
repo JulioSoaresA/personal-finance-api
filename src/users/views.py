@@ -1,6 +1,6 @@
 from django.contrib.auth import get_user_model
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters, mixins, viewsets
+from rest_framework import filters, mixins, viewsets, permissions
 from rest_framework.throttling import UserRateThrottle
 
 from users.serializers import UserSerializer
@@ -10,6 +10,7 @@ User = get_user_model()
 
 class UserListView(mixins.ListModelMixin, viewsets.GenericViewSet):
     serializer_class = UserSerializer
+    permission_classes = [permissions.IsAdminUser]
     throttle_classes = [UserRateThrottle]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
     search_fields = ["username", "email"]

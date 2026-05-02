@@ -10,7 +10,7 @@ from django.db.models.functions import Coalesce
 from django.db.models.fields import DecimalField
 from transactions.serializers import (
     TransactionSerializer,
-    TransactionCreateSerializer,
+    TransactionWriteSerializer,
     DashboardSerializer,
     AccountListSerializer,
     AccountWriteSerializer,
@@ -70,8 +70,8 @@ class TransactionViewSet(viewsets.ModelViewSet):
     ordering = ["-date"]
 
     def get_serializer_class(self):
-        if self.action == "create":
-            return TransactionCreateSerializer
+        if self.action in ["create", "update", "partial_update"]:
+            return TransactionWriteSerializer
         if self.action == "summary":
             return DashboardSerializer
         return TransactionSerializer
