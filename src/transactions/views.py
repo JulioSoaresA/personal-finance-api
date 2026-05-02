@@ -2,7 +2,6 @@ from rest_framework import viewsets, status, filters
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.exceptions import ValidationError
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import Sum
 from transactions.models import Transaction, Account, Category
@@ -22,6 +21,12 @@ from transactions.services import TransactionService
 from django.utils.translation import gettext_lazy as _
 from datetime import date
 from rest_framework.views import APIView
+from transactions.errors import (
+    CategoryHasTransactionsError,
+    AccountHasTransactionsError,
+    NotInPaymentPlanError,
+    TransactionCreationError,
+)
 
 
 class CategoryViewSet(viewsets.ModelViewSet):
@@ -48,13 +53,7 @@ class CategoryViewSet(viewsets.ModelViewSet):
 
     def perform_destroy(self, instance):
         if instance.transactions.exists():
-            raise ValidationError(
-                {
-                    "error": _(
-                        "It is not possible to delete a category that has associated transactions."
-                    )
-                }
-            )
+            raise CategoryHasTransactionsError()
         instance.delete()
 
 
@@ -100,7 +99,7 @@ class TransactionViewSet(viewsets.ModelViewSet):
                 user=request.user, data=data
             )
         except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            raise TransactionCreationError(e)
 
         response_serializer = TransactionSerializer(transactions[0])
         return Response(response_serializer.data, status=status.HTTP_201_CREATED)
@@ -129,10 +128,7 @@ class TransactionViewSet(viewsets.ModelViewSet):
         transaction = self.get_object()
 
         if not transaction.installment_group_id:
-            return Response(
-                {"error": _("This transaction is not part of a payment plan.")},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+            raise NotInPaymentPlanError()
 
         return Response(
             {"message": _("The installments were successfully removed.")},
@@ -217,13 +213,7 @@ class AccountViewSet(viewsets.ModelViewSet):
 
     def perform_destroy(self, instance):
         if instance.transactions.exists():
-            raise ValidationError(
-                {
-                    "error": _(
-                        "It is not possible to delete an account that has transactions. Archive it or delete the transactions first."
-                    )
-                }
-            )
+            raise AccountHasTransactionsError()
 
         instance.delete()
 

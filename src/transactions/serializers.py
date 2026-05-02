@@ -1,6 +1,14 @@
 from rest_framework import serializers
+from transactions.errors import (
+    InvalidColorFormatError,
+    CategoryAlreadyExistsError,
+    InvalidCategoryError,
+    InvalidAccountError,
+    MissingInstallmentsTotalError,
+    MissingTransactionValueError,
+    CreditCardDatesRequiredError,
+)
 from transactions.models import Transaction, Category, Account
-from django.utils.translation import gettext_lazy as _
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -19,9 +27,7 @@ class CategoryWriteSerializer(serializers.ModelSerializer):
         import re
 
         if not re.match(r"^#[0-9A-Fa-f]{6}$", value):
-            raise serializers.ValidationError(
-                _("Color should be in the format HEX (#RRGGBB). Example: #FF5733")
-            )
+            raise InvalidColorFormatError()
         return value
 
     def validate(self, data):
@@ -29,15 +35,14 @@ class CategoryWriteSerializer(serializers.ModelSerializer):
         name = data.get("name")
         category_type = data.get("type")
 
-        queryset = Category.objects.filter(user=user, name=name, type=category_type)
-
+        queryset = Category.objects.filter(
+            user=user, name__iexact=name, type=category_type
+        )
         if self.instance:
             queryset = queryset.exclude(pk=self.instance.pk)
 
         if queryset.exists():
-            raise serializers.ValidationError(
-                {"name": _("You already have a category with this name and type.")}
-            )
+            raise CategoryAlreadyExistsError()
 
         return data
 
@@ -85,27 +90,19 @@ class TransactionCreateSerializer(serializers.ModelSerializer):
     def validate(self, data):
         user = self.context["request"].user
         if data.get("category") and data["category"].user != user:
-            raise serializers.ValidationError({"category_id": "Invalid category."})
+            raise InvalidCategoryError()
         if data["account"].user != user:
-            raise serializers.ValidationError({"account_id": "Invalid account."})
+            raise InvalidAccountError()
 
         installments = data.get("installment_total")
         inst_value = data.get("installment_value")
         total_value = data.get("value")
 
         if inst_value and not installments:
-            raise serializers.ValidationError(
-                {
-                    "installment_total": _(
-                        "Necessary to inform the number of installments when the installment value is fixed."
-                    )
-                }
-            )
+            raise MissingInstallmentsTotalError()
 
         if not total_value and not inst_value:
-            raise serializers.ValidationError(
-                _("Inform the 'value' (total) or 'installment_value'")
-            )
+            raise MissingTransactionValueError()
 
         return data
 
@@ -185,7 +182,5 @@ class AccountWriteSerializer(serializers.ModelSerializer):
     def validate(self, data):
         if data.get("account_type") == "CREDIT_CARD":
             if not data.get("closing_day") or not data.get("due_day"):
-                raise serializers.ValidationError(
-                    _("For Credit Card, closing and due days are required.")
-                )
+                raise CreditCardDatesRequiredError()
         return data
