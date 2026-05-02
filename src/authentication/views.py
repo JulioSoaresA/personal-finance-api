@@ -2,7 +2,6 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from rest_framework import generics, status
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.throttling import AnonRateThrottle
@@ -12,7 +11,8 @@ from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
 from django.utils.translation import gettext_lazy as _
 
 from users.serializers import UserRegistrationSerializer, UserSerializer
-from authentication.serializers import CustomTokenObtainPairSerializer
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from authentication.errors import LogoutFailedError
 
 User = get_user_model()
 
@@ -78,66 +78,37 @@ class RegisterView(generics.CreateAPIView):
 
 
 class LoginView(TokenObtainPairView):
-    serializer_class = CustomTokenObtainPairSerializer
+    serializer_class = TokenObtainPairSerializer
     throttle_classes = [AnonRateThrottle]
 
     def post(self, request, *args, **kwargs):
-        try:
-            serializer = self.get_serializer(data=request.data)
-            serializer.is_valid(raise_exception=True)
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
 
-            user = serializer.user
+        user = serializer.user
+        tokens = serializer.validated_data
+        user_serializer = UserSerializer(user)
 
-            tokens = serializer.validated_data
+        res = Response(
+            {"success": True, "user": user_serializer.data},
+            status=status.HTTP_200_OK,
+        )
 
-            user_serializer = UserSerializer(user)
+        res.set_cookie(
+            key="access_token",
+            value=tokens["access"],
+            **_cookie_attrs(),
+        )
 
-            res = Response(
-                {"success": True, "user": user_serializer.data},
-                status=status.HTTP_200_OK,
-            )
-
+        refresh_token = tokens.get("refresh")
+        if refresh_token:
             res.set_cookie(
-                key="access_token",
-                value=tokens["access"],
+                key="refresh_token",
+                value=refresh_token,
                 **_cookie_attrs(),
             )
 
-            refresh_token = tokens.get("refresh")
-            if refresh_token:
-                res.set_cookie(
-                    key="refresh_token",
-                    value=refresh_token,
-                    **_cookie_attrs(),
-                )
-
-            return res
-
-        except ValidationError as e:
-            error_msg = _("Invalid credentials")
-            if hasattr(e, "detail") and e.detail:
-                if isinstance(e.detail, dict):
-                    first_key = next(iter(e.detail))
-                    field_error = (
-                        str(e.detail[first_key][0])
-                        if isinstance(e.detail[first_key], list)
-                        else str(e.detail[first_key])
-                    )
-                    error_msg = f"{first_key}: {field_error}"
-                elif isinstance(e.detail, list):
-                    error_msg = str(e.detail[0])
-                else:
-                    error_msg = str(e.detail)
-
-            return Response(
-                {"success": False, "error": error_msg},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        except Exception as e:
-            return Response(
-                {"success": False, "error": str(e)},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+        return res
 
 
 @api_view(["POST"])
@@ -153,8 +124,8 @@ def logout(request):
                 RefreshToken(refresh_token).blacklist()
             except TokenError:
                 pass
-            except Exception as e:
-                return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            except Exception:
+                raise LogoutFailedError
 
         response = Response(
             {"success": _("Logged out successfully")},
@@ -165,5 +136,5 @@ def logout(request):
         response.delete_cookie("refresh_token")
 
         return response
-    except Exception as e:
-        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    except Exception:
+        raise LogoutFailedError
