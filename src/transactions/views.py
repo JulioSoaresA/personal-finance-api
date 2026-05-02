@@ -130,6 +130,8 @@ class TransactionViewSet(viewsets.ModelViewSet):
         if not transaction.installment_group_id:
             raise NotInPaymentPlanError()
 
+        TransactionService.delete_installment_series(transaction)
+
         return Response(
             {"message": _("The installments were successfully removed.")},
             status=status.HTTP_204_NO_CONTENT,
@@ -152,12 +154,16 @@ class DashboardView(APIView):
             income=Coalesce(
                 Sum("value", filter=Q(type="INCOME")),
                 Value(0, output_field=DecimalField()),
-            )
+            ),
+            expense=Coalesce(
+                Sum("value", filter=Q(type="EXPENSE")),
+                Value(0, output_field=DecimalField()),
+            ),
         )
 
         category_data = (
             queryset.filter(type="EXPENSE")
-            .values("category")
+            .values("category__name", "category__color")
             .annotate(total=Sum("value"))
             .order_by("-total")
         )
