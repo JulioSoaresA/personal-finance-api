@@ -1,10 +1,10 @@
 FROM python:3.11-slim
 
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    POETRY_HOME=/etc/poetry \
     PROJECT_DIR=/app
-ENV PATH="$POETRY_HOME/bin:$PATH"
 
 RUN apt-get update && apt-get install -y \
     build-essential \
@@ -14,16 +14,17 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR $PROJECT_DIR
 
-RUN curl -sSL https://install.python-poetry.org | python3 - && \
-    ln -s /root/.local/bin/poetry /usr/local/bin/poetry
-
-COPY poetry.toml poetry.lock pyproject.toml ./
-
-RUN poetry config virtualenvs.create false \
- && poetry install --no-interaction --no-ansi --no-root
+RUN --mount=type=cache,target=/root/.cache/uv \
+    --mount=type=bind,source=uv.lock,target=uv.lock \
+    --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
+    uv sync --frozen --no-install-project
 
 COPY . /app
 
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --frozen
+
+ENV PATH="/app/.venv/bin:$PATH"
 ENV PYTHONPATH=/app/src
 
 WORKDIR /app/src
