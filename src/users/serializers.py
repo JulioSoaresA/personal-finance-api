@@ -3,6 +3,13 @@ from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
 from django.utils.translation import gettext_lazy as _
 
+from users.errors import (
+    UsernameAlreadyExistsError,
+    EmailAlreadyExistsError,
+    FirstNameRequiredError,
+    LastNameRequiredError,
+    PasswordsDoNotMatchError,
+)
 
 User = get_user_model()
 
@@ -27,31 +34,27 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 
     def validate_username(self, value):
         if User.objects.filter(username__iexact=value).exists():
-            raise serializers.ValidationError(
-                _("A user with that username already exists."),
-            )
+            raise UsernameAlreadyExistsError
         return value
 
     def validate_email(self, value):
         if value and User.objects.filter(email__iexact=value).exists():
-            raise serializers.ValidationError(
-                _("A user with that email already exists.")
-            )
+            raise EmailAlreadyExistsError
         return value
 
     def validate_first_name(self, value):
         if not value:
-            raise serializers.ValidationError(_("First name is required."))
+            raise FirstNameRequiredError
         return value
 
     def validate_last_name(self, value):
         if not value:
-            raise serializers.ValidationError(_("Last name is required."))
+            raise LastNameRequiredError
         return value
 
     def validate(self, data):
         if data.get("password") != data.get("password2"):
-            raise serializers.ValidationError(_("Passwords do not match"))
+            raise PasswordsDoNotMatchError
 
         validate_password(data.get("password"))
 
