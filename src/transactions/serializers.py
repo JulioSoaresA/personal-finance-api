@@ -188,6 +188,9 @@ class AccountWriteSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         if data.get("account_type") == "CREDIT_CARD":
-            if not data.get("closing_day") or not data.get("due_day"):
+            closing_day = self.initial_data.get("closing_day")
+            due_day = self.initial_data.get("due_day")
+
+            if not closing_day or not due_day:
                 raise CreditCardDatesRequiredError()
         return data

@@ -67,7 +67,12 @@ class MissingTransactionValueError(ValidationError):
 
 class CreditCardDatesRequiredError(ValidationError):
     default_code = "credit_card_dates_required"
-    default_detail = _("For Credit Card, closing and due days are required.")
+
+    def __init__(self):
+        super().__init__(
+            {"error": _("For Credit Card, closing and due days are required.")},
+            code=self.default_code,
+        )
 
 
 class InvalidRecurrenceUpdateError(ValidationError):
