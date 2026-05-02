@@ -8,16 +8,16 @@ dc_down:
 	@docker compose down -v
 
 test: dc_up
-	@pytest -n auto
+	@uv run pytest -n auto
 
 lint:
 	uv run ruff check .
 
 pre_commit:
-	@pre-commit run -a
+	@uv run pre-commit run -a
 
 test_cov: dc_up
-	@pytest -n auto --cov=src --cov-report=term-missing --cov-report=html
+	@uv run pytest -n auto --cov=src --cov-report=term-missing --cov-report=html
 
 migration:
 	@cd src && uv run python manage.py makemigrations
