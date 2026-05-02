@@ -45,10 +45,7 @@ class UserProfileTest(APITestCase):
 
     def test_update_profile_success(self):
         self.authenticate()
-        data = {
-            "first_name": "Julio Updated",
-            "default_currency": "EUR"
-        }
+        data = {"first_name": "Julio Updated", "default_currency": "EUR"}
         response = self.client.patch(self.url, data, format="json")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)

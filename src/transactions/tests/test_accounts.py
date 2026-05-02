@@ -3,6 +3,8 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 from django.contrib.auth import get_user_model
 from authentication.tests.helpers import sample_user
+from transactions.models import Account, Category, Transaction
+from datetime import date
 
 User = get_user_model()
 
@@ -75,3 +77,67 @@ class AccountTest(APITestCase):
         }
         response = self.client.post(self.url, data, format="json")
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_list_accounts_success(self):
+        Account.objects.create(user=self.user, name="Acc 1", account_type="CASH")
+        Account.objects.create(user=self.user, name="Acc 2", account_type="CHECKING")
+
+        self.authenticate()
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        results = response.data.get("results", response.data)
+        self.assertEqual(len(results), 2)
+
+    def test_list_accounts_unauthenticated(self):
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_delete_account_empty_success(self):
+        acc = Account.objects.create(
+            user=self.user, name="To Delete", account_type="CASH"
+        )
+        url = reverse("transactions:accounts-detail", kwargs={"pk": acc.pk})
+
+        self.authenticate()
+        response = self.client.delete(url)
+
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertFalse(Account.objects.filter(pk=acc.pk).exists())
+
+    def test_delete_account_with_transactions_fails(self):
+        acc = Account.objects.create(
+            user=self.user, name="With Trans", account_type="CASH"
+        )
+        cat = Category.objects.create(user=self.user, name="Food", type="EXPENSE")
+        Transaction.objects.create(
+            user=self.user,
+            account=acc,
+            category=cat,
+            description="Buy bread",
+            value=10.00,
+            date=date.today(),
+            type="EXPENSE",
+        )
+        url = reverse("transactions:accounts-detail", kwargs={"pk": acc.pk})
+
+        self.authenticate()
+        response = self.client.delete(url)
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("error", response.data)
+        self.assertTrue(Account.objects.filter(pk=acc.pk).exists())
+
+    def test_delete_other_user_account_fails(self):
+        other_user = sample_user(username="other", email="other@user.com")
+        acc = Account.objects.create(
+            user=other_user, name="Other Acc", account_type="CASH"
+        )
+        url = reverse("transactions:accounts-detail", kwargs={"pk": acc.pk})
+
+        self.authenticate()  # as self.user
+        response = self.client.delete(url)
+
+        # Should be 404 because get_queryset filters by self.request.user
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertTrue(Account.objects.filter(pk=acc.pk).exists())

@@ -26,7 +26,7 @@ class UserListTest(APITestCase):
             username="otheruser",
             email="other@test.com",
         )
-        
+
         self.url = reverse("users:user_list")
 
     def authenticate(self, email, password):
@@ -48,7 +48,7 @@ class UserListTest(APITestCase):
         # Results might be in "results" if paginated, or direct list
         results = response.data.get("results", response.data)
         self.assertIsInstance(results, list)
-        self.assertTrue(len(results) >= 2) # Should see regular_user and other_user
+        self.assertTrue(len(results) >= 2)  # Should see regular_user and other_user
 
     def test_user_list_admin_excludes_self(self):
         self.authenticate("admin@test.com", "AdminPassword123!")
@@ -70,10 +70,10 @@ class UserListTest(APITestCase):
 
     def test_user_list_search(self):
         self.authenticate("admin@test.com", "AdminPassword123!")
-        
+
         # Search for "other"
         response = self.client.get(f"{self.url}?search=other")
-        
+
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         results = response.data.get("results", response.data)
         self.assertEqual(len(results), 1)
