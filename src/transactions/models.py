@@ -66,8 +66,12 @@ class Account(BaseModel):
         max_digits=12, decimal_places=2, default=0.00, verbose_name=_("Initial Balance")
     )
 
-    closing_day = models.PositiveSmallIntegerField(verbose_name=_("Closing Day"))
-    due_day = models.PositiveSmallIntegerField(verbose_name=_("Due Day"))
+    closing_day = models.PositiveSmallIntegerField(
+        null=True, blank=True, default=1, verbose_name=_("Closing Day")
+    )
+    due_day = models.PositiveSmallIntegerField(
+        null=True, blank=True, default=1, verbose_name=_("Due Day")
+    )
 
     class Meta:
         verbose_name = _("Account")
