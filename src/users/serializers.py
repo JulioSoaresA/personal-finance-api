@@ -61,34 +61,13 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         validated_data.pop("password2", None)
-        username = validated_data.pop("username")
-        email = validated_data.pop("email", None)
-        first_name = validated_data.pop("first_name", None)
-        last_name = validated_data.pop("last_name", None)
         password = validated_data.pop("password")
-        default_currency = validated_data.pop("default_currency", None)
 
-        username_norm = username.lower()
-        email_norm = email.lower() if email else email
+        validated_data["username"] = validated_data["username"].lower()
+        if validated_data.get("email"):
+            validated_data["email"] = validated_data["email"].lower()
 
-        if default_currency:
-            user = User.objects.create_user(
-                username_norm,
-                email_norm,
-                password,
-                first_name=first_name,
-                last_name=last_name,
-                default_currency=default_currency,
-            )
-        else:
-            user = User.objects.create_user(
-                username_norm,
-                email_norm,
-                password,
-                first_name=first_name,
-                last_name=last_name,
-            )
-        return user
+        return User.objects.create_user(password=password, **validated_data)
 
 
 class UserSerializer(serializers.ModelSerializer):
