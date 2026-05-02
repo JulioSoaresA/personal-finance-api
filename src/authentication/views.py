@@ -8,6 +8,7 @@ from rest_framework.response import Response
 from rest_framework.throttling import AnonRateThrottle
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
 from django.utils.translation import gettext_lazy as _
 
 from users.serializers import UserRegistrationSerializer, UserSerializer
@@ -29,39 +30,43 @@ def _cookie_attrs():
 
 class CustomRefreshTokenView(TokenRefreshView):
     def post(self, request, *args, **kwargs):
+        refresh_token = request.COOKIES.get("refresh_token")
+
+        if isinstance(request.data, dict):
+            data = request.data
+        else:
+            data = request.data.copy()
+
+        data["refresh"] = refresh_token
+
+        serializer = self.get_serializer(data=data)
+
         try:
-            refresh_token = request.COOKIES.get("refresh_token")
+            serializer.is_valid(raise_exception=True)
+        except TokenError as e:
+            raise InvalidToken(e.args[0])
 
-            request.data["refresh"] = refresh_token
+        tokens = serializer.validated_data
+        access_token = tokens.get("access")
+        new_refresh = tokens.get("refresh")
 
-            response = super().post(request, *args, **kwargs)
-            if response.status_code != status.HTTP_200_OK:
-                return response
+        res = Response({"refreshed": True}, status=status.HTTP_200_OK)
 
-            tokens = response.data
-            access_token = tokens.get("access")
-            new_refresh = tokens.get("refresh")
+        if access_token:
+            res.set_cookie(
+                key="access_token",
+                value=access_token,
+                **_cookie_attrs(),
+            )
 
-            res = Response({"refreshed": True}, status=status.HTTP_200_OK)
+        if new_refresh:
+            res.set_cookie(
+                key="refresh_token",
+                value=new_refresh,
+                **_cookie_attrs(),
+            )
 
-            if access_token:
-                res.set_cookie(
-                    key="access_token",
-                    value=access_token,
-                    **_cookie_attrs(),
-                )
-
-            if new_refresh:
-                res.set_cookie(
-                    key="refresh_token",
-                    value=new_refresh,
-                    **_cookie_attrs(),
-                )
-
-            return res
-
-        except Exception:
-            return Response({"refreshed": False})
+        return res
 
 
 class RegisterView(generics.CreateAPIView):
@@ -146,8 +151,10 @@ def logout(request):
         if refresh_token:
             try:
                 RefreshToken(refresh_token).blacklist()
-            except Exception:
+            except TokenError:
                 pass
+            except Exception as e:
+                return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
         response = Response(
             {"success": _("Logged out successfully")},
