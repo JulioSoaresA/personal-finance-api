@@ -52,9 +52,8 @@ class JWTAuthenticationTest(APITestCase):
 
         response = self.client.post(self.token_url, data, format="json")
 
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertFalse(response.data["success"])
-        self.assertIn("error", response.data)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertIn("detail", response.data)
 
     def test_login_cookie_settings(self):
         data = login_payload("testuser", "password")

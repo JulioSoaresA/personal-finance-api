@@ -52,42 +52,18 @@ class AuthRegressionsTest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn("non_field_errors", response.data)
 
-    def test_login_with_username_instead_of_email_success(self):
-        # Create a user first
-        User.objects.create_user(
-            username="julio",
-            email="julio@example.com",
-            password="Password123!",
-            first_name="Julio",
-            last_name="Soares"
-        )
-        
-        url = reverse("authentication:login")
-        # Try login using 'username' key but with the email value
-        data = {
-            "username": "julio@example.com",
-            "password": "Password123!"
-        }
-        response = self.client.post(url, data, format="json")
-        
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertTrue(response.data["success"])
-        self.assertEqual(response.data["user"]["email"], "julio@example.com")
-
     def test_login_missing_all_fields_shows_field_name_in_error(self):
         url = reverse("authentication:login")
         response = self.client.post(url, {}, format="json")
-        
+
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertFalse(response.data["success"])
-        # Should contain one of the missing field names
-        self.assertTrue(any(field in response.data["error"] for field in ["email", "password"]))
+        self.assertIn("password", response.data)
 
     def test_logout_success(self):
         # Create and login user to get cookies
         user = User.objects.create_user(username="logoutuser", email="logout@example.com", password="password")
         login_url = reverse("authentication:login")
-        login_res = self.client.post(login_url, {"username": "logout@example.com", "password": "password"}, format="json")
+        login_res = self.client.post(login_url, {"email": "logout@example.com", "password": "password"}, format="json")
         
         # Now logout
         url = reverse("authentication:logout")
@@ -104,7 +80,7 @@ class AuthRegressionsTest(APITestCase):
         # Create and login user to get refresh cookie
         user = User.objects.create_user(username="refreshuser", email="refresh@example.com", password="password")
         login_url = reverse("authentication:login")
-        login_res = self.client.post(login_url, {"username": "refresh@example.com", "password": "password"}, format="json")
+        login_res = self.client.post(login_url, {"email": "refresh@example.com", "password": "password"}, format="json")
         
         refresh_token = login_res.cookies["refresh_token"].value
         
@@ -121,7 +97,7 @@ class AuthRegressionsTest(APITestCase):
         # Create and login user to get valid cookie
         user = User.objects.create_user(username="cookieuser", email="cookie@example.com", password="password")
         login_url = reverse("authentication:login")
-        login_res = self.client.post(login_url, {"username": "cookie@example.com", "password": "password"}, format="json")
+        login_res = self.client.post(login_url, {"email": "cookie@example.com", "password": "password"}, format="json")
         access_token = login_res.cookies["access_token"].value
         
         # We'll hit a simple protected endpoint
