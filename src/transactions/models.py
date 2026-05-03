@@ -86,6 +86,12 @@ class Transaction(BaseModel):
         EXPENSE = "EXPENSE", _("Expense")
         TRANSFER = "TRANSFER", _("Transfer")
 
+    class PaymentMethod(models.TextChoices):
+        DEBIT = "DEBIT", _("Debit")
+        CREDIT = "CREDIT", _("Credit")
+        PIX = "PIX", _("Pix")
+        CASH = "CASH", _("Cash")
+
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name=_("User")
     )
@@ -112,6 +118,12 @@ class Transaction(BaseModel):
     paid = models.BooleanField(default=True, verbose_name=_("Paid"))
     type = models.CharField(
         max_length=10, choices=TransactionType.choices, verbose_name=_("Type")
+    )
+    payment_method = models.CharField(
+        max_length=10,
+        choices=PaymentMethod.choices,
+        default=PaymentMethod.CASH,
+        verbose_name=_("Payment Method"),
     )
 
     installment_group_id = models.UUIDField(
