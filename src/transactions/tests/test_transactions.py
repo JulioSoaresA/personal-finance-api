@@ -114,3 +114,60 @@ class TransactionRegressionsTest(APITestCase):
         self.assertFalse(
             Transaction.objects.filter(installment_group_id=group_id).exists()
         )
+
+
+class TransactionCreationTests(APITestCase):
+    def setUp(self):
+        self.user = create_user(username="transuser", email="trans@test.com")
+        self.acc = Account.objects.create(
+            user=self.user,
+            name="Main Acc",
+            account_type="CHECKING",
+            initial_balance=1000,
+        )
+        self.cat = Category.objects.create(
+            user=self.user, name="Food", type="EXPENSE", color="#FF0000"
+        )
+        self.client = authenticate_user(self.client, self.user)
+        self.url = reverse("transactions:transactions-list")
+
+    def test_create_single_transaction_success(self):
+        data = {
+            "description": "Grocery shopping",
+            "value": "250.00",
+            "date": "2026-05-01",
+            "account_id": self.acc.id,
+            "category_id": self.cat.id,
+            "type": "EXPENSE",
+            "paid": True,
+            "notes": "Weekly groceries",
+        }
+        response = self.client.post(self.url, data, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data["description"], "Grocery shopping")
+        self.assertEqual(float(response.data["value"]), 250.00)
+
+    def test_create_transaction_missing_fields_fails(self):
+        data = {
+            "description": "Missing Value",
+            # missing value
+            "date": "2026-05-01",
+            "account_id": self.acc.id,
+            "type": "EXPENSE",
+        }
+        response = self.client.post(self.url, data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("value", response.data)
+
+    def test_create_transaction_invalid_date_fails(self):
+        data = {
+            "description": "Invalid Date",
+            "value": "100.00",
+            "date": "INVALID-DATE",
+            "account_id": self.acc.id,
+            "type": "EXPENSE",
+        }
+        response = self.client.post(self.url, data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("date", response.data)
