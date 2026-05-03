@@ -19,6 +19,7 @@ class TransactionService:
             account=data.get("account"),
             category=data.get("category"),
             type=data.get("type"),
+            payment_method=data.get("payment_method", Transaction.PaymentMethod.CASH),
             paid=data.get("paid", True),
             description=data.get("description"),
             value=data.get("value"),
@@ -64,6 +65,9 @@ class TransactionService:
                 account=data.get("account"),
                 category=data.get("category"),
                 type=data.get("type"),
+                payment_method=data.get(
+                    "payment_method", Transaction.PaymentMethod.CASH
+                ),
                 paid=False,
                 description=f"{base_description} ({current_installment_number}/{total_count})",
                 value=final_value,

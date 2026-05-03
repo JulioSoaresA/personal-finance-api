@@ -75,6 +75,16 @@ class CreditCardDatesRequiredError(ValidationError):
         )
 
 
+class CreditPaymentInstallmentsRequiredError(ValidationError):
+    default_code = "credit_installments_required"
+
+    def __init__(self):
+        super().__init__(
+            {"installment_total": _("Installments are required for credit payments.")},
+            code=self.default_code,
+        )
+
+
 class InvalidRecurrenceUpdateError(ValidationError):
     default_code = "invalid_recurrence_update"
     default_detail = _(

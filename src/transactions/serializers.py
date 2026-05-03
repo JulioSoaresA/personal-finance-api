@@ -7,6 +7,7 @@ from transactions.errors import (
     MissingInstallmentsTotalError,
     MissingTransactionValueError,
     CreditCardDatesRequiredError,
+    CreditPaymentInstallmentsRequiredError,
 )
 from transactions.models import Transaction, Category, Account
 
@@ -80,6 +81,7 @@ class TransactionWriteSerializer(serializers.ModelSerializer):
             "account_id",
             "category_id",
             "type",
+            "payment_method",
             "paid",
             "installment_total",
             "installment_value",
@@ -110,6 +112,10 @@ class TransactionWriteSerializer(serializers.ModelSerializer):
         if not total_value and not inst_value:
             raise MissingTransactionValueError()
 
+        payment_method = data.get("payment_method")
+        if payment_method == Transaction.PaymentMethod.CREDIT and not installments:
+            raise CreditPaymentInstallmentsRequiredError()
+
         return data
 
 
@@ -129,6 +135,7 @@ class TransactionSerializer(serializers.ModelSerializer):
             "formatted_date",
             "paid",
             "type",
+            "payment_method",
             "category",
             "account",
             "installment_current",
