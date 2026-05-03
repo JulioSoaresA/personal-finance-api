@@ -69,6 +69,7 @@ class TransactionWriteSerializer(serializers.ModelSerializer):
         required=False,
         write_only=True,
     )
+    value = serializers.DecimalField(max_digits=12, decimal_places=2, required=False)
 
     class Meta:
         model = Transaction

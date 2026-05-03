@@ -151,14 +151,16 @@ class TransactionCreationTests(APITestCase):
     def test_create_transaction_missing_fields_fails(self):
         data = {
             "description": "Missing Value",
-            # missing value
             "date": "2026-05-01",
             "account_id": self.acc.id,
+            "category_id": self.cat.id,
             "type": "EXPENSE",
         }
         response = self.client.post(self.url, data, format="json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn("value", response.data)
+        self.assertTrue(
+            isinstance(response.data, list) or "non_field_errors" in response.data
+        )
 
     def test_create_transaction_invalid_date_fails(self):
         data = {
@@ -166,8 +168,121 @@ class TransactionCreationTests(APITestCase):
             "value": "100.00",
             "date": "INVALID-DATE",
             "account_id": self.acc.id,
+            "category_id": self.cat.id,
             "type": "EXPENSE",
         }
         response = self.client.post(self.url, data, format="json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn("date", response.data)
+
+    def test_create_transaction_with_other_user_account_fails(self):
+        other_user = create_user(username="otheruser", email="other@test.com")
+        other_acc = Account.objects.create(
+            user=other_user, name="Other Acc", account_type="CASH"
+        )
+        data = {
+            "description": "IDOR",
+            "value": "10.00",
+            "date": "2026-05-01",
+            "account_id": other_acc.id,
+            "category_id": self.cat.id,
+            "type": "EXPENSE",
+        }
+        response = self.client.post(self.url, data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("account_id", response.data)
+
+    def test_create_transaction_missing_both_values_fails(self):
+        data = {
+            "description": "No Value",
+            "date": "2026-05-01",
+            "account_id": self.acc.id,
+            "category_id": self.cat.id,
+            "type": "EXPENSE",
+        }
+        response = self.client.post(self.url, data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertTrue(
+            isinstance(response.data, list) or "non_field_errors" in response.data
+        )
+
+
+class TransactionInstallmentTests(APITestCase):
+    def setUp(self):
+        self.user = create_user(username="instuser", email="inst@test.com")
+        self.acc = Account.objects.create(
+            user=self.user,
+            name="Main Acc",
+            account_type="CHECKING",
+            initial_balance=10000,
+        )
+        self.cat = Category.objects.create(
+            user=self.user, name="Electronics", type="EXPENSE", color="#0000FF"
+        )
+        self.client = authenticate_user(self.client, self.user)
+        self.url = reverse("transactions:transactions-list")
+
+    def test_create_installments_from_total_value_success(self):
+        data = {
+            "description": "New Laptop",
+            "value": "6000.00",
+            "date": "2026-05-01",
+            "account_id": self.acc.id,
+            "category_id": self.cat.id,
+            "type": "EXPENSE",
+            "installment_total": 12,
+            "notes": "12x installments",
+        }
+        response = self.client.post(self.url, data, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data["installment_total"], 12)
+        self.assertIsNotNone(response.data["installment_group_id"])
+
+        self.assertEqual(
+            Transaction.objects.filter(
+                installment_group_id=response.data["installment_group_id"]
+            ).count(),
+            12,
+        )
+
+        first_trans = Transaction.objects.get(id=response.data["id"])
+        self.assertEqual(float(first_trans.value), 500.00)
+
+    def test_create_installments_from_fixed_installment_value_success(self):
+        data = {
+            "description": "Subscription",
+            "installment_value": "100.00",
+            "date": "2026-05-01",
+            "account_id": self.acc.id,
+            "category_id": self.cat.id,
+            "type": "EXPENSE",
+            "installment_total": 5,
+        }
+        response = self.client.post(self.url, data, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data["installment_total"], 5)
+
+        first_trans = Transaction.objects.get(id=response.data["id"])
+        self.assertEqual(float(first_trans.value), 100.00)
+
+        self.assertEqual(
+            Transaction.objects.filter(
+                installment_group_id=response.data["installment_group_id"]
+            ).count(),
+            5,
+        )
+
+    def test_create_installments_missing_total_fails(self):
+        data = {
+            "description": "Invalid",
+            "installment_value": "100.00",
+            "date": "2026-05-01",
+            "account_id": self.acc.id,
+            "category_id": self.cat.id,
+            "type": "EXPENSE",
+        }
+        response = self.client.post(self.url, data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("installment_total", response.data)
