@@ -132,10 +132,7 @@ class TransactionViewSet(viewsets.ModelViewSet):
 
         TransactionService.delete_installment_series(transaction)
 
-        return Response(
-            {"message": _("The installments were successfully removed.")},
-            status=status.HTTP_204_NO_CONTENT,
-        )
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class DashboardView(APIView):
@@ -153,17 +150,17 @@ class DashboardView(APIView):
         summary = queryset.aggregate(
             income=Coalesce(
                 Sum("value", filter=Q(type="INCOME")),
-                Value(0, output_field=DecimalField()),
+                Value(0, output_field=DecimalField(max_digits=12, decimal_places=2)),
             ),
             expense=Coalesce(
                 Sum("value", filter=Q(type="EXPENSE")),
-                Value(0, output_field=DecimalField()),
+                Value(0, output_field=DecimalField(max_digits=12, decimal_places=2)),
             ),
         )
 
         category_data = (
             queryset.filter(type="EXPENSE")
-            .values("category__name", "category__color")
+            .values(category_name=F("category__name"), color=F("category__color"))
             .annotate(total=Sum("value"))
             .order_by("-total")
         )

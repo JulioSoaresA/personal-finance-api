@@ -1,3 +1,4 @@
+from datetime import date
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
@@ -286,3 +287,81 @@ class TransactionInstallmentTests(APITestCase):
         response = self.client.post(self.url, data, format="json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn("installment_total", response.data)
+
+    def test_delete_installment_series_success(self):
+        data = {
+            "description": "Series to Delete",
+            "value": "300.00",
+            "date": "2026-05-01",
+            "account_id": self.acc.id,
+            "category_id": self.cat.id,
+            "type": "EXPENSE",
+            "installment_total": 3,
+        }
+        res = self.client.post(self.url, data, format="json")
+        group_id = res.data["installment_group_id"]
+        trans_id = res.data["id"]
+
+        delete_url = reverse(
+            "transactions:transactions-delete-series", kwargs={"pk": trans_id}
+        )
+        response = self.client.delete(delete_url)
+
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEqual(response.content, b"")  # Verify no body
+
+        self.assertEqual(
+            Transaction.objects.filter(installment_group_id=group_id).count(), 0
+        )
+
+    def test_delete_non_series_fails(self):
+        data = {
+            "description": "Single",
+            "value": "100.00",
+            "date": "2026-05-01",
+            "account_id": self.acc.id,
+            "category_id": self.cat.id,
+            "type": "EXPENSE",
+        }
+        res = self.client.post(self.url, data, format="json")
+        trans_id = res.data["id"]
+
+        delete_url = reverse(
+            "transactions:transactions-delete-series", kwargs={"pk": trans_id}
+        )
+        response = self.client.delete(delete_url)
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("error", response.data)
+
+    def test_delete_series_other_user_fails(self):
+        other_user = create_user(username="otherinst", email="otherinst@test.com")
+        other_acc = Account.objects.create(
+            user=other_user, name="Other", account_type="CASH"
+        )
+        other_cat = Category.objects.create(
+            user=other_user, name="Other", type="EXPENSE"
+        )
+
+        from decimal import Decimal
+        from transactions.services import TransactionService
+
+        other_trans = TransactionService.create_transaction(
+            user=other_user,
+            data={
+                "description": "Other Series",
+                "value": Decimal("100.00"),
+                "date": date(2026, 5, 1),
+                "account": other_acc,
+                "category": other_cat,
+                "type": "EXPENSE",
+                "installment_total": 2,
+            },
+        )[0]
+
+        delete_url = reverse(
+            "transactions:transactions-delete-series", kwargs={"pk": other_trans.id}
+        )
+        response = self.client.delete(delete_url)
+
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)

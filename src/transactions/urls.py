@@ -18,5 +18,5 @@ router.register(r"categories", CategoryViewSet, basename="categories")
 
 urlpatterns = [
     path("", include(router.urls)),
-    path("dashboard", DashboardView.as_view(), name="dashboard"),
+    path("dashboard/", DashboardView.as_view(), name="dashboard"),
 ]
