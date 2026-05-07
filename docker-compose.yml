@@ -1,13 +1,5 @@
-services:
-  postgres:
-    image: postgres:15
-    environment:
-      POSTGRES_DB: ${DB_NAME}
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data/
-volumes:
-  postgres_data:
+# Banco de dados hospedado no Supabase — não há serviços locais.
+# Configure as credenciais no .env (veja sample.env).
+# Adicione aqui serviços futuros como Redis/Celery quando necessário.
+
+
