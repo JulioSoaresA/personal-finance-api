@@ -24,6 +24,8 @@ COPY . /app
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --frozen
 
+RUN SECRET_KEY=dummy-key uv run python src/manage.py collectstatic --noinput
+
 ENV PATH="/app/.venv/bin:$PATH"
 ENV PYTHONPATH=/app/src
 
