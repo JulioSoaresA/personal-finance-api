@@ -13,6 +13,9 @@ test:
 lint:
 	@uv run ruff check .
 
+format:
+	@uv run ruff format .
+
 pre_commit:
 	@uv run pre-commit run -a
 
@@ -55,5 +58,5 @@ local_test: local_dc_up
 local_test_cov: local_dc_up
 	@set -a && . ./.env.local && set +a && uv run pytest -n auto --cov=src --cov-report=term-missing --cov-report=html
 
-.PHONY: dc_up dc_build dc_down test test_cov lint pre_commit migration migrate server messages \
+.PHONY: dc_up dc_build dc_down test test_cov lint format pre_commit migration migrate server messages \
         local_dc_up local_dc_down local_migrate local_server local_test local_test_cov

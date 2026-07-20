@@ -1,0 +1,25 @@
+dependencies:
+  - ruff
+  - pytest
+  - make
+
+hooks:
+  review:
+    lint:
+      extension: ruff-linter
+      command: make lint
+      enabled: true
+      prompt: 'Proceed with linting analysis?'
+      description: 'Triggers the Ruff linter across all files to detect code smells.'
+    format:
+      extension: ruff-formatter
+      command: make format
+      enabled: true
+      prompt: 'Proceed with code formatting?'
+      description: 'Formats all files using Ruff to maintain stylistic consistency.'
+    test:
+      extension: pytest-suite
+      command: make test
+      enabled: true
+      prompt: 'Execute unit tests?'
+      description: 'Runs the project test suite (make sure Docker services are up).'
