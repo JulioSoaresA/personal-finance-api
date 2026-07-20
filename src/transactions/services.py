@@ -24,6 +24,7 @@ class TransactionService:
             description=data.get("description"),
             value=data.get("value"),
             date=data.get("date"),
+            is_recurring=data.get("is_recurring", False),
             notes=data.get("notes", ""),
         )
         return [transaction]
@@ -72,6 +73,7 @@ class TransactionService:
                 description=f"{base_description} ({current_installment_number}/{total_count})",
                 value=final_value,
                 date=due_date,
+                is_recurring=data.get("is_recurring", False),
                 installment_group_id=group_id,
                 installment_current=current_installment_number,
                 installment_total=total_count,
