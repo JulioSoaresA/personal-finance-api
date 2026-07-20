@@ -145,6 +145,12 @@ class Transaction(BaseModel):
         verbose_name=_("Installment Total"),
     )
 
+    is_recurring = models.BooleanField(
+        default=False,
+        help_text=_("Flag to indicate if this is a recurring expense"),
+        verbose_name=_("Is Recurring"),
+    )
+
     notes = models.TextField(blank=True, null=True, verbose_name=_("Notes"))
 
     class Meta:

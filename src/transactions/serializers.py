@@ -85,6 +85,7 @@ class TransactionWriteSerializer(serializers.ModelSerializer):
             "paid",
             "installment_total",
             "installment_value",
+            "is_recurring",
             "notes",
         ]
 
@@ -141,6 +142,7 @@ class TransactionSerializer(serializers.ModelSerializer):
             "installment_current",
             "installment_total",
             "installment_group_id",
+            "is_recurring",
             "notes",
         ]
 
